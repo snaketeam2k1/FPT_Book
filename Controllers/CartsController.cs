@@ -17,10 +17,26 @@ namespace FPT_Book.Controllers
             _userManager = userManager;
         }
 
+        public ActionResult BackToLogin()
+        {            
+            return View();
+        }
+
         public async Task<IActionResult> AddToCart(string isbn)
         {
             string thisUserId = _userManager.GetUserId(HttpContext.User);
-            Cart myCart = new Cart() { UId = thisUserId, BookIsbn = isbn };
+
+            if (thisUserId == null)
+            {
+                return RedirectToAction("BackToLogin", "Carts"/*, new { area ="" }*/);
+
+            }
+
+            Cart myCart = new Cart() { 
+                UId = thisUserId, 
+                BookIsbn = isbn,
+                Quantity = 1
+            };
             Cart fromDb = _context.Cart.FirstOrDefault(c => c.UId == thisUserId && c.BookIsbn == isbn);
             //if not existing (or null), add it to cart. If already added to Cart before, ignore it.
             if (fromDb == null)
@@ -86,7 +102,7 @@ namespace FPT_Book.Controllers
         public ActionResult Index()
         {
             string thisUserId = _userManager.GetUserId(HttpContext.User);
-            return View(_context.Cart.Where(c => c.UId == thisUserId));
+            return View(_context.Cart.Include(b => b.Book).Where(c => c.UId == thisUserId));
         }
 
     }

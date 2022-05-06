@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using FPT_Book.Areas.Identity.Data;
 using FPT_Book.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace FPT_Book.Controllers
 {
@@ -19,15 +20,18 @@ namespace FPT_Book.Controllers
     {
         private readonly UserContext _context;
 
-        public StoreController(UserContext context)
+        private readonly UserManager<AppUser> _userManager;
+        public StoreController(UserContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Store
         public async Task<IActionResult> Index()
         {
-            var userContext = _context.Store.Include(s => s.User);
+            var userid = _userManager.GetUserId(HttpContext.User);
+            var userContext = _context.Store.Include(s => s.User).Where(u => u.User.Id == userid);
             return View(await userContext.ToListAsync());
         }
 
@@ -53,7 +57,8 @@ namespace FPT_Book.Controllers
         // GET: Store/Create
         public IActionResult Create()
         {
-            ViewData["UId"] = new SelectList(_context.Users, "Id", "UserName");
+            var userid = _userManager.GetUserId(HttpContext.User);
+            ViewData["UId"] = _context.Users.Where(c => c.Id==userid).FirstOrDefault().UserName;
             return View();
         }
 
@@ -64,8 +69,10 @@ namespace FPT_Book.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Address,Slogan,UId")] Store store)
         {
+            var userid = _userManager.GetUserId(HttpContext.User);
             if (ModelState.IsValid)
             {
+                store.UId = userid;
                 _context.Add(store);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

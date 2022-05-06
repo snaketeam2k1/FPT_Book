@@ -15,6 +15,5 @@ using System.ComponentModel.DataAnnotations.Schema;
         public string? UId { get; set; }
         public AppUser? User { get; set; }
         public virtual ICollection<Book>? Books { get; set; }
-
-    }
+}
 

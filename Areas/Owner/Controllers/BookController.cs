@@ -36,29 +36,25 @@ namespace FPT_Book.Controllers
         public async Task<IActionResult> Index(string searchString="", int id = 0)
         {
             ViewData["CurrentFilter"] = searchString;
-
+            var userid = _userManager.GetUserId(HttpContext.User);
             var books = from s in _context.Book
                         select s;
-            if (searchString != null)
-            {
-                books = books.Include(b => b.Category). 
-                    Where(s => s.Title.Contains(searchString) || s.Category.Name.Contains(searchString) || s.Author.Contains(searchString));
-            }
-            int numOfFilteredBook = books.Count();
-            ViewBag.NumberOfPages = (int)Math.Ceiling((double)numOfFilteredBook / iteminapage);
             ViewBag.CurrentPage = id;
-            List<Book> booklist = await books.Skip(id * iteminapage)
+          
+                books = books.Include(b => b.Category)
+                .Include(s => s.Store)
+                .ThenInclude(u => u.User)
+                
+                            
+                    .Where(s => s.Title.Contains(searchString) || s.Category.Name.Contains(searchString) || s.Author.Contains(searchString))
+                    .Where(b => b.Store.UId==userid);
+                int numOfFilteredBook = books.Count();
+                ViewBag.NumberOfPages = (int)Math.Ceiling((double)numOfFilteredBook / iteminapage);
+                List<Book> booklist = await books.Skip(id * iteminapage)
                 .Take(iteminapage).ToListAsync();
-            if (id > 1)
-            {
-                ViewBag.idpagprev = id - 1;
-            }          
-                ViewBag.idpagenext = id + 1;
-                   
-            ViewBag.currentPage = id;
-            return View(booklist);
+                return View(booklist);         
+                              
         }
-
 
         // GET: Book/Details/5
         public async Task<IActionResult> Details(string id)
@@ -83,10 +79,11 @@ namespace FPT_Book.Controllers
         // GET: Book/Create
         public IActionResult Create()
         {
-            var userid = _userManager.GetUserId(HttpContext.User);
-            ViewData["StoreId"] = _context.Store.Where(s => s.UId == userid).FirstOrDefault().Name;
             ViewData["CategoryId"] = new SelectList(_context.Category, "Id", "Name");
-           /* ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Name");*/
+
+            var userid = _userManager.GetUserId(HttpContext.User);
+           
+            ViewData["StoreId"] = _context.Store.Where(s => s.UId == userid).FirstOrDefault().Name;
             return View();
         }
 
@@ -106,7 +103,9 @@ namespace FPT_Book.Controllers
                 {
                     image.CopyTo(stream);
                 }
-                book.ImgUrl = imgName;
+                book.ImgUrl = "img/" + imgName;
+                Book store = _context.Book.Include(b => b.Store).Where(s => s.Store.UId == userid).FirstOrDefault();
+                book.StoreId = store.StoreId;
             }
             else
             {
@@ -117,15 +116,15 @@ namespace FPT_Book.Controllers
                 _context.Add(book);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
-            ViewData["CategoryId"] = new SelectList(_context.Category, "Id", "Name", book.CategoryId);
-            /*   ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Name", book.StoreId);*/
+            }            
+
+            ViewData["CategoryId"] = new SelectList(_context.Category, "Id", "Name");
+
             ViewData["StoreId"] = _context.Store.Where(s => s.UId == userid).FirstOrDefault().Name;
-            Store thisStore = _context.Store.Where(s => s.UId == userid).FirstOrDefault();
-            book.StoreId = thisStore.Id;
 
             return View(book);
         }
+
 
         // GET: Book/Edit/5
         public async Task<IActionResult> Edit(string id)
@@ -212,7 +211,6 @@ namespace FPT_Book.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
         private bool BookExists(string id)
         {
             return _context.Book.Any(e => e.Isbn == id);

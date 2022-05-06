@@ -11,7 +11,7 @@ namespace FPT_Book.Models
         public string Author { get; set; }
         public double Price { get; set; }
         public string Desc { get; set; }
-        public string ImgUrl { get; set; }
+        public string? ImgUrl { get; set; }
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
         public int? StoreId { get; set; }

@@ -20,8 +20,11 @@
 		<dt class="col-sm-2">
 			@Html.DisplayNameFor(model => model.ImgUrl)
 		</dt>
+		
+		@*Ảnh*@
 		<dd class="col-sm-10">
 			<img src="@Html.DisplayFor(model => model.ImgUrl)" width="200px"/>
+			@Html.DisplayFor(model => model.ImgUrl)		
 		</dd>
 
 		<dt class="col-sm-2">
