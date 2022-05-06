@@ -1120,3 +1120,9 @@ C:\Users\Ozer\Desktop\FPT_Book\bin\Debug\net6.0\refs\Microsoft.AspNetCore.Crypto
 C:\Users\Ozer\Desktop\FPT_Book\bin\Debug\net6.0\refs\Microsoft.Extensions.FileProviders.Embedded.dll
 C:\Users\Ozer\Desktop\FPT_Book\bin\Debug\net6.0\refs\Microsoft.Extensions.Identity.Core.dll
 C:\Users\Ozer\Desktop\FPT_Book\bin\Debug\net6.0\refs\Microsoft.Extensions.Identity.Stores.dll
+C:\Users\Ozer\Desktop\FPT_Book\obj\Debug\net6.0\scopedcss\Views\Shared\_LayoutUser.cshtml.rz.scp.css
+C:\Users\Ozer\Desktop\FPT_Book\bin\Debug\net6.0\JetBrains.Annotations.dll
+C:\Users\Ozer\Desktop\FPT_Book\bin\Debug\net6.0\Microsoft.AspNetCore.JsonPatch.dll
+C:\Users\Ozer\Desktop\FPT_Book\bin\Debug\net6.0\Newtonsoft.Json.Bson.dll
+C:\Users\Ozer\Desktop\FPT_Book\bin\Debug\net6.0\X.PagedList.dll
+C:\Users\Ozer\Desktop\FPT_Book\bin\Debug\net6.0\X.PagedList.Mvc.Core.dll

@@ -45,23 +45,25 @@
             @Html.DisplayNameFor(model => model.ImgUrl)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImgUrl)
+            <img
+            src="@Html.DisplayFor(model => model.ImgUrl)"    width="200px"            
+            />
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Category)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category.Id)
+            @Html.DisplayFor(model => model.Category.Name)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Store)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Store.Id)
+            @Html.DisplayFor(model => model.Store.Name)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Isbn">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Isbn">Edit</a> 
+     <a asp-action="Delete" asp-route-id="@Model?.Isbn">Delete</a> 
 </div>

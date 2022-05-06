@@ -18,6 +18,8 @@ public class UserContext : IdentityDbContext<AppUser>
     public DbSet<Category> Category { get; set; }
     public DbSet<Order> Order { get; set; }
     public DbSet<OrderDetail> OrderDetail { get; set; }
+
+    public DbSet<Cart> Cart { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -35,12 +37,12 @@ public class UserContext : IdentityDbContext<AppUser>
             .HasOne<Category>(b => b.Category)
             .WithMany(ct => ct.Books)
             .HasForeignKey(b => b.CategoryId);
-
+        //Order 
         builder.Entity<Order>()
             .HasOne<AppUser>(o => o.User)
             .WithMany(ap => ap.Orders)
             .HasForeignKey(o => o.UId);
-
+        //Order Detail
         builder.Entity<OrderDetail>()
             .HasKey(od => new { od.OrderId, od.BookIsbn });
 
@@ -52,7 +54,20 @@ public class UserContext : IdentityDbContext<AppUser>
         builder.Entity<OrderDetail>()
             .HasOne<Book>(od => od.Book)
             .WithMany(b => b.OrderDetails)
-            .HasForeignKey(od => od.BookIsbn)   
+            .HasForeignKey(od => od.BookIsbn)
             .OnDelete(DeleteBehavior.NoAction);
+        //Cart
+        builder.Entity<Cart>()
+            .HasKey(c => new { c.UId, c.BookIsbn });
+        builder.Entity<Cart>()
+            .HasOne<AppUser>(c => c.User)
+            .WithMany(u => u.Carts)
+            .HasForeignKey(c => c.UId);
+        builder.Entity<Cart>()
+            .HasOne<Book>(od => od.Book)
+            .WithMany(b => b.Carts)
+            .HasForeignKey(od => od.BookIsbn)
+            .OnDelete(DeleteBehavior.NoAction);
+
     }
 }

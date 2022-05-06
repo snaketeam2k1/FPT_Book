@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using FPT_Book.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using FPT_Book.Email;
+
+
 
 WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<UserContext>(options =>
@@ -11,8 +13,6 @@ builder.Services.AddDbContext<UserContext>(options =>
 builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<UserContext>();
-
-
 
 //Configure a bit on Identity Option
 builder.Services.Configure<IdentityOptions>(options =>

@@ -1,14 +1,60 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Users Page";
+	Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
+@model IEnumerable<FPT_Book.Models.Book>
 
-<div class="text-center">
+@*Search form*@
+<form asp-controller="Book" asp-action="Index" method="get">
+			<input type="search" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search here..."  >
+			<input type="submit" value="Search" class="submit-search" asp-route-id="0" >            
+            <a asp-action="Index">Back to Full List</a>
+		</form>
 
 
-    <h1 class="display-4">Welcome</h1>
-    <p>
-  @ViewBag.message
-</p>
+    <div class="container">
+      <div class="row">
+          @foreach (var book in Model)
+          {
+              <div class="col-md-4 col-6">
+                  <div class="card" style="width: 18rem;">
+                      <img src="@book.ImgUrl" class="card-img-top" alt="...">
+                      <div class="card-body">
+                          <h5 class="card-title">@book.Title</h5>
+                          <h5 class="card-title">$@book.Price</h5>
+                
+                          <a asp-action="Details" asp-route-id="@book.Isbn" class="btn btn-primary">Detail</a>
+                          <a asp-action="AddToCart" asp-controller="Carts" asp-route-isbn="@book.Isbn" class="btn btn-primary">Add to cart</a>
+                      </div>
+                  </div>
+              </div>
+          }
+      </div>
+  </div>
 
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+<div style="display:flex;text-align:center;justify-content:center">
+  <nav aria-label="...">
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <a class="page-link" href="/Home/Index/@ViewBag.idpagprev" aria-label="Previous">
+                   Previous
+                </a>
+            </li>
+            @for (var i = 0; i < ViewBag.NumberOfPages; i++)
+            {
+                var style = (ViewBag.currentPage == @i) ? "active" : "";
+                <li class="page-item @style " aria-current="page">
+                    <a asp-action="Index" asp-route-id="@(i)" asp-route-SearchString="@ViewData["CurrentFilter"]" class="page-link">@(i +1 ) </a>
+                </li>
+
+            }
+
+            <li class="page-item">
+                <a class="page-link" href="/Home/Index/@ViewBag.idpagenext" aria-label="Next">
+                   Next
+                </a>
+            </li>
+        </ul>
+    </nav>
 </div>

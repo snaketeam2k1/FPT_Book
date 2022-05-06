@@ -99,18 +99,15 @@ namespace FPT_Book.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Author")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Desc")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImgUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Pages")
@@ -119,11 +116,10 @@ namespace FPT_Book.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
-                    b.Property<int>("StoreId")
+                    b.Property<int?>("StoreId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Isbn");
@@ -133,6 +129,24 @@ namespace FPT_Book.Migrations
                     b.HasIndex("StoreId");
 
                     b.ToTable("Book");
+                });
+
+            modelBuilder.Entity("FPT_Book.Models.Cart", b =>
+                {
+                    b.Property<string>("UId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("BookIsbn")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("UId", "BookIsbn");
+
+                    b.HasIndex("BookIsbn");
+
+                    b.ToTable("Cart");
                 });
 
             modelBuilder.Entity("FPT_Book.Models.Category", b =>
@@ -216,13 +230,13 @@ namespace FPT_Book.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[UId] IS NOT NULL");
 
                     b.ToTable("Store");
                 });
@@ -374,13 +388,30 @@ namespace FPT_Book.Migrations
 
                     b.HasOne("FPT_Book.Models.Store", "Store")
                         .WithMany("Books")
-                        .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("StoreId");
 
                     b.Navigation("Category");
 
                     b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("FPT_Book.Models.Cart", b =>
+                {
+                    b.HasOne("FPT_Book.Models.Book", "Book")
+                        .WithMany("Carts")
+                        .HasForeignKey("BookIsbn")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("FPT_Book.Areas.Identity.Data.AppUser", "User")
+                        .WithMany("Carts")
+                        .HasForeignKey("UId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FPT_Book.Models.Order", b =>
@@ -417,9 +448,7 @@ namespace FPT_Book.Migrations
                 {
                     b.HasOne("FPT_Book.Areas.Identity.Data.AppUser", "User")
                         .WithOne("Store")
-                        .HasForeignKey("FPT_Book.Models.Store", "UId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FPT_Book.Models.Store", "UId");
 
                     b.Navigation("User");
                 });
@@ -477,6 +506,8 @@ namespace FPT_Book.Migrations
 
             modelBuilder.Entity("FPT_Book.Areas.Identity.Data.AppUser", b =>
                 {
+                    b.Navigation("Carts");
+
                     b.Navigation("Orders");
 
                     b.Navigation("Store");
@@ -484,6 +515,8 @@ namespace FPT_Book.Migrations
 
             modelBuilder.Entity("FPT_Book.Models.Book", b =>
                 {
+                    b.Navigation("Carts");
+
                     b.Navigation("OrderDetails");
                 });
 

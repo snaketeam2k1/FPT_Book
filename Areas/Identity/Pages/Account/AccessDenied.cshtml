@@ -1,0 +1,11 @@
+﻿@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Access denied";
+}
+
+<header>
+    <h1 class="text-danger">@ViewData["Title"]</h1>
+    <p class="text-danger">Your account are customer account, You must create an account as a seller to create a store </p>
+    <a id="register" asp-area="Identity" asp-page="/Account/Register">Register Seller account</a>
+</header>

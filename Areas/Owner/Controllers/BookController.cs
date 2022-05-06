@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using FPT_Book.Areas.Identity.Data;
 using FPT_Book.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace FPT_Book.Controllers
 {
@@ -19,90 +20,45 @@ namespace FPT_Book.Controllers
     {
         private readonly UserContext _context;
 
-        private readonly int _recordsPerPage = 4;
-        public BookController(UserContext context)
+        private readonly UserManager<AppUser> _userManager;
+
+        private readonly int iteminapage = 10;
+        public BookController(UserContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-       /* [HttpGet]
+        //Search and pagination
 
-        public async Task<IActionResult> Index(string? Booksearch, int id = 0) 
-        {
-            ViewData["Getbookdetails"] = Booksearch;
+        [HttpGet]
 
-            var bookquery = from b in _context.Book.Include(b => b.Category).Include(b => b.Store) select b;
-            if (!String.IsNullOrEmpty(Booksearch))
-            {
-                bookquery = bookquery.Where(b => b.Title.Contains(Booksearch) || b.Author.Contains(Booksearch) *//*b.Category.Contains(Booksearch)*//*);
-
-            }
-            return View(await bookquery.AsNoTracking().ToListAsync());
-        }*/
-
-        public async Task<IActionResult> Search(string? searchString, int id = 0)
+        public async Task<IActionResult> Index(string searchString="", int id = 0)
         {
             ViewData["CurrentFilter"] = searchString;
-            var books = from b in _context.Book
-                        .Include(b => b.Category)
-                        .Include(b => b.Store)
-                        select b;
-            books = books.Where(b => b.Title.Contains(searchString));
-            int numberOfRecords = books.Count();
-            int numberOfPages = (int)Math.Ceiling((double)numberOfRecords / _recordsPerPage);
-            ViewBag.numberOfPages = numberOfPages;
-            ViewBag.numberOfRecords = numberOfRecords;
-            if (numberOfRecords > 0)
+
+            var books = from s in _context.Book
+                        select s;
+            if (searchString != null)
             {
-                int max = 5;
-                int min;
-                int end;
-                if (numberOfRecords < max)
-                {
-                    min = 1;
-                    end = numberOfRecords;
-                }
-                else
-                {
-                    min = id;
-                    end = id + max - 1;
-                    if (end > numberOfRecords)
-                    {
-                        end = numberOfRecords;
-                    }
-                }
-                ViewBag.max = max;
-                ViewBag.min = min;
-                ViewBag.end = end;
+                books = books.Include(b => b.Category). 
+                    Where(s => s.Title.Contains(searchString) || s.Category.Name.Contains(searchString) || s.Author.Contains(searchString));
             }
-            List<Book> booksList = await books
-                .Skip(id * _recordsPerPage)
-                .Take(_recordsPerPage)
-                .Include(b => b.Category)
-                .Include(b => b.Store)
-                .ToListAsync();
-            ViewBag.EndPage = numberOfPages - 1;
+            int numOfFilteredBook = books.Count();
+            ViewBag.NumberOfPages = (int)Math.Ceiling((double)numOfFilteredBook / iteminapage);
+            ViewBag.CurrentPage = id;
+            List<Book> booklist = await books.Skip(id * iteminapage)
+                .Take(iteminapage).ToListAsync();
+            if (id > 1)
+            {
+                ViewBag.idpagprev = id - 1;
+            }          
+                ViewBag.idpagenext = id + 1;
+                   
             ViewBag.currentPage = id;
-            return View(books);
+            return View(booklist);
         }
 
-        // GET: Book
-        public async Task<IActionResult> Index(int id = 0)
-        {
-            
-
-            int numberOfRecords = await _context.Book.CountAsync();     //Count SQL
-            int numberOfPages = (int)Math.Ceiling((double)numberOfRecords / _recordsPerPage);
-            ViewBag.numberOfPages = numberOfPages;
-            ViewBag.currentPage = id;
-            List<Book> listbook = await _context.Book.Include(b => b.Category).Include(b => b.Store)
-             .Skip(id * _recordsPerPage)  //Offset SQL
-             .Take(_recordsPerPage)       //Top SQL
-             .ToListAsync();
-            return View(listbook);
-            /*var userContext = _context.Book.Include(b => b.Category).Include(b => b.Store);
-            return View(await userContext.ToListAsync());*/
-        }
 
         // GET: Book/Details/5
         public async Task<IActionResult> Details(string id)
@@ -127,8 +83,10 @@ namespace FPT_Book.Controllers
         // GET: Book/Create
         public IActionResult Create()
         {
+            var userid = _userManager.GetUserId(HttpContext.User);
+            ViewData["StoreId"] = _context.Store.Where(s => s.UId == userid).FirstOrDefault().Name;
             ViewData["CategoryId"] = new SelectList(_context.Category, "Id", "Name");
-            ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Name");
+           /* ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Name");*/
             return View();
         }
 
@@ -139,6 +97,7 @@ namespace FPT_Book.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Isbn,Title,Pages,Author,Price,Desc,ImgUrl,CategoryId,StoreId")] Book book, IFormFile image)
         {
+            var userid = _userManager.GetUserId(HttpContext.User);
             if (image != null)
             {
                 string imgName = book.Isbn + Path.GetExtension(image.FileName);
@@ -160,7 +119,11 @@ namespace FPT_Book.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CategoryId"] = new SelectList(_context.Category, "Id", "Name", book.CategoryId);
-            ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Name", book.StoreId);
+            /*   ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Name", book.StoreId);*/
+            ViewData["StoreId"] = _context.Store.Where(s => s.UId == userid).FirstOrDefault().Name;
+            Store thisStore = _context.Store.Where(s => s.UId == userid).FirstOrDefault();
+            book.StoreId = thisStore.Id;
+
             return View(book);
         }
 
